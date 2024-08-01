@@ -8,3 +8,92 @@ from sklearn.svm import SVC
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 from sklearn.impute import SimpleImputer
 from sklearn.pipeline import Pipeline
+
+df = pd.read_csv("/content/sample_data/hypertension_data.csv")
+df.head()
+
+# EDA
+df.info()
+
+# Check for missing values
+
+def missing (df):
+    missing_number = df.isnull().sum().sort_values(ascending=False)
+    missing_percent = (df.isnull().sum()/df.isnull().count()).sort_values(ascending=False)
+    missing_values = pd.concat([missing_number, missing_percent], axis=1, keys=['Missing_Number'])
+    return missing_values
+
+missing(df)
+
+# Handle missing values
+imputer = SimpleImputer(strategy='mean')
+df['sex'] = imputer.fit_transform(df[['sex']])
+
+# Handle missing values
+imputer = SimpleImputer(strategy='mean')
+df['sex'] = imputer.fit_transform(df[['sex']])
+
+# Define features and target
+X = df.drop('target', axis=1)
+y = df['target']
+
+# Split the data
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Scale the features
+scaler = StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
+
+# Define models
+models = {
+    'Logistic Regression': LogisticRegression(),
+    'Decision Tree': DecisionTreeClassifier(),
+    'Random Forest': RandomForestClassifier(),
+    'Gradient Boosting': GradientBoostingClassifier(),
+    'SVM': SVC()
+}
+
+# Train and evaluate models
+for name, model in models.items():
+    model.fit(X_train, y_train)
+    y_pred = model.predict(X_test)
+    print(f'{name} Performance:')
+    print(f'Accuracy: {accuracy_score(y_test, y_pred)}')
+    print(f'Precision: {precision_score(y_test, y_pred)}')
+    print(f'Recall: {recall_score(y_test, y_pred)}')
+    print(f'F1 Score: {f1_score(y_test, y_pred)}\n')
+
+age = input("What is the patient's age?")
+sex = input("What is the patient's gender?")
+cp = input("What is the chest pain type?")
+trestbps = input("What is the resting blood pressure in mm Hg?")
+chol = input("What is serum cholestorol in mg/dl?")
+fbs = input("Is the fasting blood sugar > 120 mg/dl?")
+restecg = input("What is the patient's resting ECG results?")
+thalach = input("What is the patient's maximum heart rate achieved?")
+exang = input("Does the patient have exercise induced angina?")
+oldpeak = input("What is ST depression induced by exercise relative to rest?")
+Slope = input("What is the patient's slope of the peak exercise ST segment?")
+Ca = input("What is the number of major vessels (0-3) colored by fluoroscopy?")
+Thal = input("Does the patient have thalassemia?")
+
+# Prediction
+import numpy as np
+
+input_data = (age, sex, cp, trestbps, chol, fbs, restecg, thalach, exang, oldpeak, Slope, Ca, Thal)
+
+
+#Change the input data to a numpy array
+input_data_as_numpy_array = np.asarray(input_data)
+
+#Reshape the numpy array as we are predicting for only on instance
+input_data_reshaped = input_data_as_numpy_array.reshape(1,-1)
+
+prediction = model.predict(input_data_reshaped)
+print(prediction)
+
+if (prediction[0] == 0):
+  print('The patient has a LOW chance of getting hypertension')
+else:
+  print('The patient has a HIGH chance of getting hypertension')
